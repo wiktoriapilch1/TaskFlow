@@ -1,10 +1,8 @@
-
 from sqlmodel import Session, select
-
-from backend.app.core.exceptions import InvalidCredentialsException, UserAlreadyExistsException
-from backend.app.core.security import get_password_hash, verify_password
-from backend.app.models.users import ROLE_USER, User
-from backend.app.schemas.user import UserCreate
+from app.core.exceptions import InvalidCredentialsException, UserAlreadyExistsException
+from app.core.security import get_password_hash, verify_password
+from app.models.users import ROLE_USER, User
+from app.schemas.user import UserCreate
 
 class UserService():
     def __init__(self, session: Session):
