@@ -3,6 +3,9 @@ from app.core.exceptions import InvalidCredentialsException, UserAlreadyExistsEx
 from app.core.security import get_password_hash, verify_password
 from app.models.users import ROLE_USER, User
 from app.schemas.user import UserCreate
+import logging
+
+logger = logging.getLogger(__name__)
 
 class UserService():
     def __init__(self, session: Session):
@@ -11,6 +14,7 @@ class UserService():
     def create_user(self, user_in: UserCreate) -> User:
         query = select(User).where(User.email == user_in.email)
         if self.session.exec(query).first():
+            logger.info(f"User {user_in.email} already exists")
             raise UserAlreadyExistsException()
         
         user = User (
@@ -30,5 +34,7 @@ class UserService():
         query = select(User).where(User.email == email)
         user = self.session.exec(query).first()
         if not user or not verify_password(password, user.hashed_password):
+            logger.info(f"Log in failed for: {email}")
             raise InvalidCredentialsException
+        logger.info(f"User {user.email} successfully logged in (ID: {user.id})")
         return user

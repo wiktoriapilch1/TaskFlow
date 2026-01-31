@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlmodel import Session
+import logging
 
 from app.core.security import create_access_token, create_refresh_token
 from app.db.session import get_session
@@ -8,6 +9,7 @@ from app.schemas.user import AuthResponse, UserCreate
 from app.services.user_service import UserService
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 def get_user_service(session: Session = Depends(get_session)) -> UserService:
     return UserService(session)
@@ -23,6 +25,7 @@ def register(user_in: UserCreate, service: UserService = Depends(get_user_servic
 
 @router.post("/login", response_model=AuthResponse)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), service: UserService = Depends(get_user_service)):
+    logger.info(f"Trying to log in user: {form_data.username}")
     user = service.authenticate(email=form_data.username, password=form_data.password)
     return {
         "user": user,
