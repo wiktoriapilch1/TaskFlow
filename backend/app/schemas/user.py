@@ -13,3 +13,9 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     role: RoleType
+
+class AuthResponse(BaseModel):
+    user: UserRead
+    access_token: str
+    refresh_token: str
+    token_type: str = "bearer"
