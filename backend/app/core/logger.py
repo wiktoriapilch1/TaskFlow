@@ -7,7 +7,8 @@ def setup_logging():
     logging.basicConfig(
         level=logging.INFO,
         format=LOG_FORMAT,
-        handlers=[logging.StreamHandler(sys.stdout)]
+        handlers=[logging.StreamHandler(sys.stdout)],
+        force=True
     )
     logger = logging.getLogger("taskflow")
     logger.setLevel(logging.DEBUG)

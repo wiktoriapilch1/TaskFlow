@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from app.core.exceptions import InvalidCredentialsException, UserAlreadyExistsException
+from app.core.exceptions import InternalServerError, InvalidCredentialsException, UserAlreadyExistsException
 from app.core.security import get_password_hash, verify_password
 from app.models.users import ROLE_USER, User
 from app.schemas.user import UserCreate
@@ -14,7 +14,7 @@ class UserService():
     def create_user(self, user_in: UserCreate) -> User:
         query = select(User).where(User.email == user_in.email)
         if self.session.exec(query).first():
-            logger.info(f"User {user_in.email} already exists")
+            logger.warning(f"User {user_in.email} already exists")
             raise UserAlreadyExistsException()
         
         user = User (
@@ -23,18 +23,24 @@ class UserService():
             is_active = True,
             role = ROLE_USER
         )
-
-        self.session.add(user)
-        self.session.commit()
-        self.session.refresh(user)
-
+        
+        try: 
+            self.session.add(user)
+            self.session.commit()
+            self.session.refresh(user)
+        except Exception as e:
+            logger.exception(f"Critical database error while creating user: {user_in.email}")
+            self.session.rollback()
+            raise InternalServerError
+        
+        logger.info(f"User {user_in.email} created successfully")
         return user
     
     def authenticate(self, email: str, password: str) -> User:
         query = select(User).where(User.email == email)
         user = self.session.exec(query).first()
         if not user or not verify_password(password, user.hashed_password):
-            logger.info(f"Log in failed for: {email}")
+            logger.warning(f"Log in failed for: {email}")
             raise InvalidCredentialsException
         logger.info(f"User {user.email} successfully logged in (ID: {user.id})")
         return user
