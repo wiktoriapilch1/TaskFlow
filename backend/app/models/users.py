@@ -1,5 +1,8 @@
-from typing import Optional
-from sqlmodel import Field, SQLModel
+from typing import List, Optional, TYPE_CHECKING
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.projects import Project
 
 ROLE_ADMIN = "admin"
 ROLE_USER = "user"
@@ -10,3 +13,4 @@ class User(SQLModel, table=True):
     hashed_password: str
     is_active: bool = Field(default=True)
     role: str = Field(default=ROLE_USER)
+    projects: List["Project"] = Relationship(back_populates="owner")
