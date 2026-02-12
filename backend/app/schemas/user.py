@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, Optional
 from pydantic import BaseModel, EmailStr
 
 RoleType = Literal["admin", "user"]
@@ -13,6 +13,10 @@ class UserCreate(UserBase):
 class UserRead(UserBase):
     id: int
     role: RoleType
+
+class UserUpdate(UserBase):
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
 
 class AuthResponse(BaseModel):
     user: UserRead
