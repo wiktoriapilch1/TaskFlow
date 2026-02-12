@@ -1,5 +1,4 @@
-
-import datetime
+from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 from sqlmodel import Field, Relationship, SQLModel
 

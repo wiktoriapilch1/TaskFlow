@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.db.init_db import init_db
-from app.api.v1.endpoints import auth
+from app.api.v1.endpoints import auth, projects
 from app.core.logger import setup_logging
 from app.core.config import settings
 
@@ -18,6 +18,7 @@ app = FastAPI(
 )
 
 app.include_router(auth.router, prefix=f"{settings.API_V1_STR}/auth", tags=["auth"])
+app.include_router(projects.router, prefix=f"{settings.API_V1_STR}/projects", tags=["projects"])
 
 @app.get("/")
 def root():
