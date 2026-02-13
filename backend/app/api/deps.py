@@ -7,7 +7,7 @@ from pydantic import ValidationError
 from sqlmodel import Session
 from app.core.config import settings
 from app.db.session import get_session
-from app.models.users import User
+from app.models.user import User
 from app.core.security import ALGORITHM
 from app.core.exceptions import JWTException, UserInactiveException, UserNotFoundException
 from app.services.user_service import UserService
