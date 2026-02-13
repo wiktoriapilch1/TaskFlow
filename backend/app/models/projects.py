@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from sqlmodel import Field, Relationship, SQLModel
 
 if TYPE_CHECKING:
-    from app.models.users import User
+    from app.models.user import User
 
 class ProjectBase(SQLModel):
     title: str = Field(index=True)
