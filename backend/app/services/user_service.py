@@ -1,8 +1,8 @@
 from sqlmodel import Session, select
 from app.core.exceptions import InternalServerError, InvalidCredentialsException, UserAlreadyExistsException
 from app.core.security import get_password_hash, verify_password
-from app.models.users import ROLE_USER, User
-from app.schemas.user import UserCreate
+from app.models.user import ROLE_USER, User
+from app.schemas.user import UserCreate, UserUpdate
 import logging
 
 logger = logging.getLogger(__name__)
@@ -11,9 +11,12 @@ class UserService():
     def __init__(self, session: Session):
         self.session = session
 
+    def get_by_email(self, email: str) -> User | None:
+        query = select(User).where(User.email == email)
+        return self.session.exec(query).first()
+
     def create_user(self, user_in: UserCreate) -> User:
-        query = select(User).where(User.email == user_in.email)
-        if self.session.exec(query).first():
+        if self.get_by_email(user_in.email):
             logger.warning(f"User {user_in.email} already exists")
             raise UserAlreadyExistsException()
         
@@ -36,6 +39,18 @@ class UserService():
         logger.info(f"User {user_in.email} created successfully")
         return user
     
+    def update_user(self, *, current_user: User, user_in: UserUpdate) -> User:
+        if user_in.email is not None and user_in.email != current_user.email:
+            if self.get_by_email(user_in.email):
+                raise UserAlreadyExistsException()
+            current_user.email = user_in.email
+            if user_in.password is not None:
+                current_user.hashed_password = get_password_hash(user_in.password)
+            self.session.add(current_user)
+            self.session.commit()
+            self.session.refresh(current_user)
+            return current_user
+
     def authenticate(self, email: str, password: str) -> User:
         query = select(User).where(User.email == email)
         user = self.session.exec(query).first()
