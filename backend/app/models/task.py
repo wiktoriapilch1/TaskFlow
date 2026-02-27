@@ -1,9 +1,12 @@
 
 from datetime import datetime, date
 from enum import Enum
-from typing import Optional
+from typing import TYPE_CHECKING, List, Optional
 
-from sqlmodel import Field, SQLModel
+from sqlmodel import Field, Relationship, SQLModel
+
+if TYPE_CHECKING:
+    from app.models.user import User
 
 class TaskPriority(str, Enum):
     LOW = "Low"
@@ -34,3 +37,4 @@ class Task(SQLModel, table=True):
     due_date: Optional[date] = None
     created_by: int = Field(foreign_key="users.id")
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    assignees: List["User"] = Relationship(link_model=TaskUserLink)
